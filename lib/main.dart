@@ -121,6 +121,10 @@ class FindDevicesScreen extends StatelessWidget {
                                   onTap: () => Navigator.of(context).push(
                                           MaterialPageRoute(builder: (context) {
                                         r.device.connect();
+                                        // r.device.services.first.then((s) {
+                                        //   var c = s.first.characteristics.first;
+                                        //   printPdf(c);
+                                        // });
                                         return DeviceScreen(device: r.device);
                                       })),
                                 ),
@@ -154,6 +158,31 @@ class FindDevicesScreen extends StatelessWidget {
   }
 }
 
+printPdf(c) async {
+  var url = 'https://req.shotel.vn/bill/?muid=1&rid=5';
+  HttpClient client = new HttpClient();
+  var downloadData = List<int>();
+  final directory = await getApplicationDocumentsDirectory();
+  String tempPath = directory.path;
+  var fileSave = new File(tempPath + '/bill.pdf');
+  var exists = await fileSave.exists();
+  if (exists) {
+    fileSave.delete();
+  } else {
+    fileSave.create();
+  }
+  client.getUrl(Uri.parse(url)).then((HttpClientRequest request) {
+    return request.close();
+  }).then((HttpClientResponse response) {
+    response.listen((d) => downloadData.addAll(d), onDone: () {
+      print(downloadData.length);
+      // fileSave.writeAsBytes(downloadData);
+      // OpenFile.open(fileSave.path);
+      c.write(downloadData);
+    });
+  });
+}
+
 class DeviceScreen extends StatelessWidget {
   const DeviceScreen({Key key, this.device}) : super(key: key);
 
@@ -170,33 +199,7 @@ class DeviceScreen extends StatelessWidget {
                             characteristic: c,
                             onReadPressed: () => c.read(),
                             onWritePressed: () async {
-                              var url =
-                                  'https://req.shotel.vn/bill/?muid=1&rid=5';
-                              HttpClient client = new HttpClient();
-                              var downloadData = List<int>();
-                              final directory =
-                                  await getApplicationDocumentsDirectory();
-                              String tempPath = directory.path;
-                              var fileSave = new File(tempPath + '/bill.pdf');
-                              var exists = await fileSave.exists();
-                              if (exists) {
-                                fileSave.delete();
-                              } else {
-                                fileSave.create();
-                              }
-                              client
-                                  .getUrl(Uri.parse(url))
-                                  .then((HttpClientRequest request) {
-                                return request.close();
-                              }).then((HttpClientResponse response) {
-                                response.listen((d) => {downloadData.addAll(d)},
-                                    onDone: () {
-                                  print(downloadData.length);
-                                  // fileSave.writeAsBytes(downloadData);
-                                  // OpenFile.open(fileSave.path);
-                                  c.write(downloadData);
-                                });
-                              });
+                              printPdf(c);
                             },
                             onNotificationPressed: () =>
                                 c.setNotifyValue(!c.isNotifying),
