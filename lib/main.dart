@@ -115,10 +115,10 @@ class FindDevicesScreen extends StatelessWidget {
                 initialData: [],
                 builder: (c, snapshot) => Column(
                       children: snapshot.data
-                          .where((o) => o.advertisementData.serviceUuids
-                              .map((o) => o.toLowerCase())
-                              .contains('00001101-0000-1000-8000-00805f9b34fb'
-                                  .toLowerCase()))
+                          // .where((o) => o.advertisementData.serviceUuids
+                          //     .map((o) => o.toLowerCase())
+                          //     .contains('00001101-0000-1000-8000-00805f9b34fb'
+                          //         .toLowerCase()))
                           .map(
                             (r) => ScanResultTile(
                                   result: r,
@@ -242,7 +242,9 @@ class DeviceScreen extends StatelessWidget {
                   text = 'DISCONNECT';
                   break;
                 case BluetoothDeviceState.disconnected:
-                  onPressed = () => device.connect();
+                  onPressed = () async {
+                    await device.connect();
+                  };
                   text = 'CONNECT';
                   break;
                 default:
